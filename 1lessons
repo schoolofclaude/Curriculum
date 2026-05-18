@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Curriculum — Johnny</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0D0D0D;color:#E8E0D0;font-family:Georgia,serif}
+  .hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1a1a1a}
+  @media(max-width:680px){.hgrid{grid-template-columns:1fr}}
+  .tcard{background:#0D0D0D;padding:44px 32px;cursor:pointer;transition:background .2s}
+  .tcard:hover{background:#141414}
+  .trow{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid #1e1e1e;cursor:pointer;transition:padding-left .2s;gap:12px}
+  .trow:hover{padding-left:8px}
+  .trow:last-child{border-bottom:none}
+  .lbody{font-family:'EB Garamond',serif;font-size:1.13rem;line-height:1.9;color:#CEC6B6;white-space:pre-wrap}
+  .btn{background:none;border:1px solid #333;color:#777;padding:10px 20px;cursor:pointer;font-family:'EB Garamond',serif;font-size:.9rem;letter-spacing:.05em;transition:all .2s}
+  .btn:hover{border-color:#666;color:#ccc}
+  .pbar{height:2px;background:linear-gradient(90deg,#C9A84C,#7EB8A4,#A07CB8);transition:width .6s ease}
+  .fi{animation:fi .3s ease}
+  @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .cc{width:20px;height:20px;border-radius:50%;border:1px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all .2s}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const lessons = {
+  "money::How compound interest actually works": `Compound interest is the single most important mathematical concept for building wealth, and most people who vaguely know it exists have never actually internalized what it means for their life. The short version: you earn interest not just on the money you put in, but on the interest you've already earned. That loop, given enough time, turns modest sums into serious money. But the part nobody tells you is that time is the real variable — not the amount you start with.
+
+Here's a concrete example. If you invest $10,000 at 25 and leave it alone earning 8% annually, by the time you're 65 you have roughly $217,000. That same $10,000 invested at 35 becomes about $100,000. Same money. Same rate. Ten years less time costs you $117,000. This is why financial advisors say "start early" like a broken record — because mathematically, starting at 25 versus 35 can be worth more than doubling your outcome.
+
+The mental model to keep: think of compound interest as a snowball rolling down a hill. At first it barely picks up snow. But once it has mass, each rotation adds more than the last. The mistake people make is judging the snowball when it's small and deciding it's not worth it. The magic is always at the end of the hill, not the beginning.
+
+This cuts both ways, and this is the part that should concern you right now. Debt compounds too. Credit card debt at 24% interest compounds against you with the same ruthless math. A $5,000 balance you leave alone for five years becomes nearly $15,000 owed. The snowball rolls downhill whether it's working for you or against you.
+
+As an athlete, your earning window in professional sports is compressed. You may have 5-10 high-earning years before income drops significantly. Compound interest rewards people who start early and stay consistent.
+
+Questions to sit with: If your playing career ended tomorrow, how long could you live on what you currently have saved? What is one expense you could cut right now to redirect into something that compounds for you instead of against you? And do you know the interest rates on every debt you currently carry?`,
+
+  "money::Reading and negotiating a contract": `Every contract you will ever sign is written by someone trying to protect their interests, not yours. That's not cynicism — it's just how contracts work. The lawyer who drafted your playing contract, your endorsement deal, your apartment lease, your phone plan — they were paid by the other side. Understanding this changes how you read everything.
+
+Most people sign contracts without reading them because the language feels impenetrable. But legal language is a learnable skill, not a secret code. The core of almost every contract comes down to four things: what each party is agreeing to do, how long it lasts, what happens if someone doesn't hold up their end, and how either party can get out. If you can find those four things in any document, you understand the contract well enough to ask the right questions.
+
+The most important clauses to look for in athlete contracts are the termination clauses (what can get you cut and with what notice), the injury protection language (are you guaranteed money if hurt?), exclusivity terms in endorsements (can you work with competing brands?), and image rights (who controls how your name and likeness are used and for how long). These aren't exotic provisions — they are standard, and they are where athletes routinely get hurt when they don't pay attention.
+
+The mental model to keep: every blank space and every vague word in a contract is a future argument waiting to happen. Vagueness almost always benefits the party with more resources to fight a dispute — which is rarely you. When you see language like "reasonable," "at our discretion," or "as determined by the company," those are red flags. Ask what they mean specifically. Get specifics in writing.
+
+On negotiation: the most powerful thing you can do is be willing to walk away — and credibly signal that. You don't have to be aggressive. You just have to be clear about what you need and calm about the possibility of not getting it. People who negotiate from desperation get bad deals. People who negotiate from options get good ones.
+
+Questions to sit with: Have you ever read a contract you signed all the way through, including the fine print? Who in your life right now could you call to look over a contract before you sign it? And what would it take for you to actually walk away from a deal that wasn't right?`,
+
+  "money::Multi-state tax obligations for athletes": `If you play professional sports and travel for games, you are almost certainly filing taxes in multiple states — and if you don't know this, you may already owe money you haven't paid. This is called the "jock tax," and it applies to any professional athlete who earns income while physically working in a state that has an income tax. You played a game in California? California wants a cut. You played in New York? New York wants theirs.
+
+Here is how it works mechanically. Most states calculate your liability based on what's called a "duty day" formula. They take the number of days you were in their state working — practice days, game days, travel days in some states — and divide that by your total duty days for the year. That percentage gets applied to your total salary. So if you played 10 duty days in a state out of 150 total duty days, roughly 6.7% of your income is taxable in that state. Across a full season with travel to multiple states, this adds up fast.
+
+The mental model to keep: think of your salary not as one pile of money owed to one state, but as a pie that gets sliced differently by every state you worked in. Your home state will usually give you a credit for taxes paid to other states to avoid double taxation, but the mechanics of that credit vary — and if you don't file correctly, you can end up paying twice or missing a credit you were owed.
+
+This is exactly why athlete-specialized CPAs exist and why working with one is worth every dollar. A CPA who doesn't understand duty day allocation will either over-file or under-file — both cost you. Keep records of where you are every day. Your game schedule is a start, but travel and practice days matter too.
+
+A few states have no income tax — Texas, Florida, Nevada, Tennessee, Washington among them. Home games in those states are effectively tax-free income.
+
+Questions to sit with: Do you currently know how many states you filed taxes in last year? Have you verified that your CPA specifically understands professional athlete tax obligations? And do you keep any kind of log of where you are on a given day?`,
+
+  "money::The difference between assets and liabilities": `An asset puts money in your pocket. A liability takes money out. That's the whole framework, and it is deceptively powerful because it forces you to look at every financial decision through the lens of cash flow — not price, not status, not what the thing is "worth" in theory.
+
+The reason this matters so much for young athletes is that the transition from not having money to having money almost always produces the same pattern: the first things people buy are liabilities disguised as assets. Cars. Jewelry. Designer clothes. A house you can barely afford. None of these put money in your pocket on a monthly basis — they all take money out, through loan payments, insurance, maintenance, depreciation, and carrying costs. They might hold value. They might even appreciate. But they are not working for you day to day.
+
+A true asset generates income or appreciates reliably while you're not working. A rental property that clears $500 a month after expenses is an asset. A stock portfolio paying dividends is an asset. A business you own that operates without your daily presence is an asset.
+
+The mental model to keep: before any significant purchase, ask yourself — after I buy this, does money flow toward me or away from me every month? That single question will filter out the majority of bad financial decisions. It won't make you a monk who never spends money on things you enjoy. But it will make you conscious of what you are buying and why.
+
+The uncomfortable truth for athletes specifically is that your body is currently your primary asset. It generates your income. This means anything you do to protect it — sleep, nutrition, recovery — is asset management.
+
+Questions to sit with: Write down the five most expensive things you own. For each one, does money flow toward you or away from you because of it? And if your income stopped tomorrow, how long could your current assets sustain you?`,
+
+  "money::How agents and advisors make money off you": `The people who manage professional athletes' careers and finances are not charities. They are businesses, and understanding how they make money is essential to understanding whose interests they are actually serving at any given moment. This is not an accusation against any individual — it is a structural reality you need to understand clearly.
+
+Sports agents in the NBA and G League are typically paid a percentage of your contract — the NBPA caps this at 4%. That sounds small, but on a meaningful contract it is significant money. More importantly, an agent who gets you a larger contract makes more money, which aligns their incentive with yours on the surface. But agents also have relationships with teams and other clients they must maintain. Sometimes getting you a deal quickly is better for their relationship with a GM than fighting longer for your best terms.
+
+Financial advisors are more complex. Some are fiduciaries — legally required to act in your best interest. Others operate under a "suitability" standard, which just means the product they sell you has to be generally appropriate, not necessarily the best option available. Fee-only advisors charge you directly for their time, removing the incentive to sell you products. Commission-based advisors make money when you buy certain investments or insurance products, creating a conflict of interest. Ask any financial advisor directly: "Are you a fiduciary? How do you make money?" If they can't answer clearly, that tells you something.
+
+The mental model to keep: follow the money. For any advisor or representative in your life, trace how they get paid and what behaviors that payment structure incentivizes. Alignment of incentives is the foundation of trust in professional relationships.
+
+Questions to sit with: Do you know specifically how each person who manages your professional or financial life is compensated? Have you ever asked your agent or financial advisor directly how they make money? And who in your current circle has no financial stake in the decisions you make?`,
+
+  "money::Building income streams that don't depend on your body": `Every professional athlete is running a business with a single point of failure: their physical health. The moment that fails — injury, age, declining performance — the primary income stream stops. This is not pessimism. It is an accurate description of reality. The athletes who end their careers in strong financial positions are almost always the ones who started building income streams that didn't require them to suit up long before their careers ended.
+
+The concept you need is passive income — money that flows to you without your direct, daily labor. There are three realistic categories for someone in your position. The first is investment income: dividends from stocks, interest from bonds, returns from index funds. These require capital upfront and time to compound, but they are the most accessible starting point. The second is rental income: owning property that tenants pay to use. The third is business ownership: having equity in a business that operates with or without you. This is the hardest to build but potentially the most valuable.
+
+The mistake athletes often make is waiting until retirement to think about this. The math works out dramatically better if you start at 22 versus 32. Even modest monthly investments in a diversified index fund, started early and held consistently, build into meaningful passive income over a decade.
+
+One underrated avenue for athletes is brand equity. Your name, your image, your story — these are assets that can be monetized through endorsements, social media, content, and eventually your own brand. This requires consistency and authenticity, not millions of followers.
+
+The mental model: think of yourself as a company with a finite operating window. What does the company look like after the star product is retired? The best companies diversify before they have to.
+
+Questions to sit with: Outside of basketball, what skills, interests, or relationships do you have that could eventually generate income? If you committed $500 a month starting now to an investment account, what would that be worth in 15 years? And what would it mean for your peace of mind on the court if your finances didn't depend entirely on staying healthy?`,
+
+  "money::What an LLC actually protects you from": `The phrase "form an LLC" gets thrown around in athlete and entrepreneur circles as if it's a magic shield that protects you from everything. It isn't. But understanding what it actually does — and doesn't — do is genuinely useful, because used correctly it is a valuable tool.
+
+LLC stands for Limited Liability Company. The core purpose is to create a legal separation between you as an individual and a business entity. If your business is sued or incurs debts, the LLC structure means your personal assets — your house, your personal bank accounts, your car — are generally protected from being seized to satisfy those business obligations. Without an LLC, if you operate as a sole proprietor and get sued, everything you own is potentially on the table.
+
+The key word is "generally." Courts can "pierce the corporate veil" — meaning ignore the LLC structure and go after your personal assets — if you commingle personal and business finances, fail to maintain basic corporate formalities, undercapitalize the business intentionally, or engage in fraud. This means having an LLC and then using it carelessly is almost as risky as not having one.
+
+An LLC does not protect you from personal guarantees. If a bank requires you to personally guarantee a business loan, you are personally on the hook regardless of the LLC. It does not protect you from criminal liability.
+
+The mental model: an LLC is a legal firewall, not a force field. It works when maintained properly and is useless — or worse, a false sense of security — when maintained poorly.
+
+Questions to sit with: Do you have any business activities — content creation, endorsements, investments — that currently run through your personal finances? Do you know what it actually costs and takes to maintain an LLC properly in your state? And have you ever spoken to an attorney, not just an accountant, about your liability exposure?`,
+
+  "money::Understanding your credit and why it matters": `Your credit score is a numerical reputation that financial institutions use to decide whether to lend you money and at what price. Most people know this in the abstract. Fewer understand how dramatically the difference between a good and poor credit score affects actual dollar amounts over a lifetime.
+
+Credit scores in the U.S. are primarily calculated by three bureaus — Equifax, Experian, and TransUnion — using FICO models. Your score ranges from 300 to 850. The factors: payment history (35% — the biggest single factor), amounts owed relative to your credit limits (30%), length of credit history (15%), new credit inquiries (10%), and credit mix (10%). The most important thing you can do is pay everything on time, every time. The second most important is keep your credit utilization below about 30%.
+
+Here is why this matters in real dollars. On a $400,000 home loan over 30 years, the difference between an excellent score and a fair one can be 1.5 to 2 percentage points of interest. That translates to $100,000 to $150,000 in additional interest paid over the life of the loan. Your credit score affects car loans, business loans, sometimes apartment applications, and occasionally employment background checks.
+
+The mental model: credit is trust quantified. The system is asking — has this person historically done what they said they would do financially? Every on-time payment is a data point in your favor. Every missed payment lingers on your report for seven years. You are building a track record whether you think about it or not.
+
+Questions to sit with: Do you know your current credit score? Have you pulled your actual credit report — which is different from your score — to see what's on it? And do you have any accounts where you're carrying a balance and only making minimum payments, and do you know what that's actually costing you?`,
+
+  "mind::What a logical fallacy is and how to spot one": `A logical fallacy is an error in reasoning — a flaw in the structure of an argument that makes the conclusion invalid, regardless of whether the conclusion happens to be true. Learning to identify them doesn't just make you better at arguing. It makes you resistant to manipulation, because most persuasion designed to bypass your thinking rather than engage it relies on one fallacy or another.
+
+The most common fallacies you'll encounter in everyday life: Ad hominem — attacking the person making an argument instead of the argument itself. "You can't trust what he says about money, he went broke." Even if his advice is sound, the attack is on him, not his reasoning. Straw man — misrepresenting someone's position to make it easier to attack. False dilemma — presenting two options as if they're the only ones when there are more. "You're either with us or against us." Ad populum — something must be true because many people believe it. Post hoc — because B followed A, A must have caused B. "I wore my lucky socks and we won — the socks work."
+
+These aren't just academic concepts. They show up in sports media, in contract negotiations, in political debates, in conversations with teammates and coaches. When an agent tells you "every other player at your level is taking this deal," that's an appeal to the masses wrapped in social pressure. When someone says "if you don't sign this now, you'll never get another offer," that's a false dilemma designed to remove your sense of options.
+
+The mental model: separate the argument from the arguer, and evaluate the structure of what's being claimed before the content. Ask — does the conclusion actually follow from the premises? Is there a step being skipped? Is something being assumed that hasn't been established?
+
+Questions to sit with: Think of the last time someone persuaded you of something. Can you identify what kind of argument they made? Have you ever caught yourself using a logical fallacy — and if so, which one do you lean on most? And when you consume sports media or social media, how often are the arguments actually logical versus just emotionally compelling?`,
+
+  "mind::The Socratic method and how to use it": `Socrates didn't lecture. He asked questions. His method — the Socratic method — is a form of disciplined questioning designed to expose the assumptions, contradictions, and weak points in someone's thinking, including your own. It's one of the most powerful intellectual tools ever developed, and it requires no credentials to use. Just curiosity and patience.
+
+The method works like this: instead of asserting your position or accepting someone else's, you ask questions that probe their reasoning. "What do you mean by that?" "How do you know that's true?" "What would it take to prove you wrong?" "If that's the case, what follows from it?" The goal is not to win the argument. It is to reach a clearer understanding of what is actually true.
+
+Socrates used this method in ancient Athens to reveal that people who believed themselves wise often held beliefs they couldn't defend when pressed. This made him enormously influential and profoundly unpopular, which eventually got him executed. The lesson there is real: questioning assumptions is powerful and sometimes socially costly. Most people don't like having their beliefs examined carefully.
+
+The practical application is twofold. First, use it on others — not aggressively, but genuinely. When someone tells you something with confidence, ask what they're basing it on. Second, use it on yourself. When you hold a belief strongly, interrogate it the same way. "Why do I believe this? What would change my mind? Is this actually true or something I was told and never questioned?"
+
+The mental model: treat every confident assertion — including your own — as a hypothesis rather than a fact. A hypothesis has to survive questioning to be trusted. A fact presented as self-evident deserves your skepticism precisely because someone is trying to skip the questioning step.
+
+Questions to sit with: What is one belief you hold confidently that you've never seriously questioned? Who in your life is willing to push back on your ideas instead of just agreeing with you? And when someone challenges your view, is your first instinct to defend yourself or to actually examine whether they might be right?`,
+
+  "mind::Stoicism as a practical philosophy for athletes": `Stoicism is a philosophy developed in ancient Greece and refined in Rome, and it is almost certainly the most practically applicable philosophy for a competitive athlete. The Stoics — Epictetus, Marcus Aurelius, Seneca — were interested in one central question: how do you live well under any circumstances, including the ones you didn't choose and can't control?
+
+The foundational principle of Stoicism is the dichotomy of control: some things are in your power, and some things are not. What is in your power: your judgments, your intentions, your effort, your responses to events. What is not in your power: outcomes, other people's opinions, injuries, coaching decisions, market forces. The Stoic practice is to focus your energy entirely on the first category and accept the second with equanimity rather than resistance.
+
+For an athlete, this is not a passive or resigned philosophy. It is intensely demanding. It means practicing your craft with absolute commitment regardless of your current circumstances — playing time, contract situation, injury, public perception. Marcus Aurelius, who was the most powerful man in the Roman Empire for nearly two decades, wrote in his private journal about the daily practice of not letting his mind drift to things outside his control. If the emperor needed to practice this, so do you.
+
+The Stoics also had a practice called negative visualization — deliberately imagining what you stand to lose so you appreciate what you have rather than taking it for granted. Imagining the end of your career, or an injury that sidelines you, is not pessimism. It is a technique for gratitude and for reducing the emotional shock of adversity when it comes.
+
+Questions to sit with: What is one thing currently affecting your mood or performance that is outside your control? What would it look like to genuinely accept that and redirect your energy toward what you can control? And who do you know — an athlete, a person in your life — who seems to embody this kind of equanimity under pressure?`,
+
+  "mind::How to construct a persuasive argument": `Persuasion is not manipulation. Manipulation bypasses someone's reasoning to get what you want. Persuasion engages their reasoning and wins them over legitimately. The distinction matters because persuasion builds trust over time while manipulation erodes it — and because learning to persuade well makes you permanently more effective in negotiations, relationships, leadership, and business.
+
+The classical framework comes from Aristotle, who identified three pillars: logos, ethos, and pathos. Logos is logical appeal — the actual reasoning, the evidence, the structure of your argument. Ethos is credibility appeal — why should the audience trust you specifically? Pathos is emotional appeal — connecting the argument to something your audience actually cares about at a human level. The most effective arguments use all three.
+
+A common mistake is leading with logic when ethos hasn't been established. If your audience doesn't trust you yet, the quality of your reasoning matters less than you think. This is why in negotiations, relationship-building before the ask is not small talk — it is strategic. You are establishing the ethos that makes your eventual argument credible.
+
+The mental model: before any significant argument, ask three questions. Why should they believe this is true? (logos) Why should they trust that I know what I'm talking about? (ethos) Why should they care? (pathos). If you can't answer all three, your argument has a weak point.
+
+Acknowledging the counterargument signals that you've thought about the issue fully and increases your credibility rather than weakening your position.
+
+Questions to sit with: Think of a time you tried to persuade someone and it didn't work. Which of the three pillars was weak? Do you tend to lead with facts and logic while underinvesting in building trust first? And is there a situation in your life right now where you need to make a case for something — what would a well-constructed argument for it look like?`,
+
+  "mind::The difference between opinion and evidence": `One of the most important cognitive skills you can develop is the ability to distinguish between what someone believes and what the evidence actually supports. This sounds simple. It is not. We are surrounded by confident assertions from media, social media, coaches, family members, and our own internal monologue — and most of these assertions never get examined for the quality of evidence behind them.
+
+Evidence exists on a spectrum of reliability. At the weakest end is anecdote — one person's experience. "I tried intermittent fasting and lost 20 pounds" tells you almost nothing reliable about what would happen to you. Next is expert opinion — more credible than anecdote but still subject to the expert's biases. Then there's observational data — patterns across large populations. And at the strongest end is controlled experimental evidence — studies where variables are isolated and outcomes measured systematically, ideally replicated by different researchers.
+
+Most of what passes for knowledge in everyday life sits at the anecdote and opinion level. This is fine for low-stakes decisions. It is not fine for health decisions, financial decisions, or major life choices. When something matters, ask: what is the actual evidence here, and how reliable is it?
+
+The mental model: when someone makes a confident claim, rate the evidence mentally on that spectrum. The confidence with which something is stated has zero correlation with the quality of evidence behind it. People are often most confident about the things they've thought about least.
+
+One important nuance: the absence of evidence is not evidence of absence. And in areas like nutrition, psychology, and social science, even "studies" vary dramatically in quality. Sample size, methodology, funding source, replication — all of these matter.
+
+Questions to sit with: What is one thing you believe confidently about health, money, or success that you've never examined the evidence for? When someone cites a study or statistic, do you ever ask how the study was conducted? And how much of what you "know" is actually evidence versus confident repetition?`,
+
+  "mind::Active listening as a power skill": `Most people are not listening when someone else is talking. They are waiting to respond — mentally formulating their reply, thinking about how they'll be perceived, or half-distracted by everything else competing for their attention. This is not a moral failing. It's the default human setting. Active listening is the discipline of overriding that default, and it is one of the most rare and powerful interpersonal skills that exists.
+
+Active listening means giving someone your full, undivided attention — not just your ears but your presence. It means listening to understand rather than listening to respond. It means noticing not just what someone says but how they say it: the pace, the hesitation, what they emphasize, what they gloss over. It means asking questions that demonstrate you heard them and want to go deeper.
+
+The power of this is counterintuitive. In a negotiation, the person who talks less and listens more almost always gains more information and leverage than the person who talks more. In leadership, the teammate who makes people feel genuinely heard earns loyalty that no motivational speech can produce. In relationships, the single variable most correlated with long-term satisfaction is feeling understood — and feeling understood requires someone who actually listens.
+
+The mental model: listening is an act of respect and intelligence, not passivity. The person who listens carefully is gathering information that the person talking freely is giving away. In any high-stakes conversation — with an agent, a coach, a business partner — the discipline of listening before speaking will almost always give you an advantage.
+
+Practically: next time you're in an important conversation, commit to asking at least two follow-up questions before you state your own position. Notice how rare it is for people to do this for you — which tells you how valuable it is when someone does.
+
+Questions to sit with: Who in your life actually makes you feel heard? What is it specifically that they do? And in your most important relationships — teammates, coaches, family — are you listening to understand, or mostly listening to respond?`,
+
+  "mind::First principles thinking": `First principles thinking is the practice of breaking a problem down to its most fundamental truths — the things you know for certain — and reasoning up from there, rather than accepting the assumptions and conventions that everyone else accepts. It is how genuinely original thinkers in every field operate. You don't have to be a billionaire for it to be useful.
+
+The opposite of first principles thinking is reasoning by analogy — doing things the way they've always been done because that's how they've always been done. Reasoning by analogy is efficient and often sensible. But it is incapable of producing genuinely new ideas, and it can trap you in assumptions that were never actually valid to begin with. "Agents always take 4%" is a convention. Whether that arrangement actually serves you is a different question that requires going back to first principles.
+
+The process: identify the problem. List every assumption surrounding it. Question each assumption — is this actually true, or is it just accepted? Strip everything down to the verified facts. Build your answer from those facts upward. It is slower than just doing what everyone else does. It is also the only reliable path to solutions that are genuinely better than what already exists.
+
+For athletes, first principles thinking is particularly useful in skill development. Instead of mimicking what everyone else does, ask: what is the actual mechanical goal of this movement? What does my body specifically need to do to achieve that outcome? The athletes who develop genuinely elite skills often do so because they understand what they're doing at a level most players don't — not just copying the form, but understanding the function.
+
+The mental model: most assumptions in any domain were made by someone, at some point, for some reason — and that reason may no longer apply or may never have been as solid as people assumed.
+
+Questions to sit with: Pick one assumption about basketball, money, or your life that everyone in your circle takes for granted. What would it look like to actually question it from the ground up? And is there a problem in your life you've been solving by following convention — what would change if you started from scratch?`,
+
+  "mind::How to read a difficult book": `Most people who say they're not readers have mostly tried to read the wrong books at the wrong time in the wrong way. Reading a difficult book — one that actually challenges you, that requires effort and slows you down — is a skill, and like every skill it gets easier with practice and worse without it. The payoff is significant: books are the densest delivery mechanism for high-quality thinking that exists.
+
+The first thing to know is that confusion is not a signal to stop. It's a signal that you're at the edge of your current understanding, which is exactly where learning happens. Most people quit difficult books when they hit confusion. The disciplined reader slows down, re-reads the passage, and sits with it. Sometimes the meaning becomes clear on the second read. Sometimes it doesn't become clear until three chapters later when the author provides context. Trust the process.
+
+The method that actually works: before you start a chapter, read the first and last paragraphs to understand where the argument is going. As you read, keep a pencil or your notes app nearby. When something strikes you, write it down — not a summary, but your reaction. "I don't agree with this because..." or "This reminds me of..." Writing activates a different kind of engagement than passive reading. At the end of each chapter, close the book and try to explain in your own words what the main point was. If you can't, you haven't learned it yet.
+
+Start with books adjacent to your existing interests. You're reading Red Rising — the appetite for big ideas in narrative form is already there. Philosophy written accessibly (Meditations by Marcus Aurelius, Letters from a Stoic by Seneca) is a natural bridge.
+
+The mental model: reading is a conversation with the author, not a download. The books that change your mind are the ones you fought with.
+
+Questions to sit with: What was the last idea from a book that actually changed how you think about something? If you committed to reading 20 pages a day, what would that add up to in a year? And is there a topic in your life where reading one serious book would genuinely change your understanding?`,
+
+  "world::Why the Roman Empire fell and what it teaches us": `The fall of Rome is one of history's most studied and most argued questions. Later historians blamed military overextension, economic collapse, political instability, and the migration of peoples from Central Asia that pressured Rome's borders. The honest answer is that Rome fell for all of these reasons operating simultaneously over several centuries — and that's precisely the lesson.
+
+The Roman Empire at its height was the most sophisticated administrative and military organization the world had ever produced. At its peak in the 2nd century, it was home to roughly 70 million people. By 476 CE — the conventional date of the Western Empire's fall — Rome's population had collapsed from perhaps a million people to under 100,000.
+
+What actually happened is a masterclass in how complex systems fail. The military became increasingly reliant on foreign soldiers whose loyalty was to their commanders rather than to Rome. The currency was debased — emperors kept diluting the silver content of coins to fund military spending, causing inflation that eroded purchasing power and trade. Political instability meant Rome cycled through 26 emperors in a single 50-year period, most of whom were assassinated. Each crisis weakened the institutions that might have solved the next crisis.
+
+The mental model: complex systems rarely fail from a single cause. They fail when multiple stresses occur simultaneously and the institutions meant to address one stress are already weakened by another. The person who loses everything rarely lost it from one bad decision. It was usually a sequence of stresses arriving when they were already weakened.
+
+For you specifically: your career is a system with multiple interdependencies — physical health, financial health, mental health, team dynamics. Neglecting one creates vulnerability in the others.
+
+Questions to sit with: What would the equivalent of "currency debasement" look like in your own life — gradually depleting something that seems to hold its value? Are there warning signs in any area of your life you're treating as isolated problems rather than signals of a larger pattern? And what institution or structure in your life would you want to be stronger if a major crisis hit?`,
+
+  "world::How the Federal Reserve works": `The Federal Reserve is the central bank of the United States, and it is arguably the most powerful financial institution in the world. Its decisions affect your mortgage rate, the value of your savings, the cost of any loan you might take out, and whether the economy contracts or expands. Understanding it at even a basic level gives you context that most people — including most college-educated adults — never get.
+
+The Fed has two primary mandates from Congress: maximize employment and maintain price stability (meaning control inflation). It pursues these primarily through controlling the federal funds rate — the interest rate at which banks lend money to each other overnight. This rate is a lever that affects nearly every other interest rate in the economy. When the Fed raises rates, borrowing becomes more expensive, economic activity slows, and inflation tends to cool. When the Fed lowers rates, borrowing becomes cheaper, activity tends to accelerate, and inflation can rise.
+
+The mechanism: if inflation is high, the Fed raises interest rates. Higher rates make mortgages, business loans, and car loans more expensive. People and businesses spend less, demand for goods drops, and prices stabilize. The cost is typically slower economic growth and, if rates go too high, recession.
+
+The Fed also acts as a lender of last resort, providing emergency liquidity to the banking system when credit markets freeze — as happened in 2008. Markets are not purely free; they operate within a framework that the Fed and government policy actively shape.
+
+The mental model: the Fed is a thermostat for the economy. It tries to keep the temperature (inflation and employment) within a comfortable range by adjusting the heat (interest rates). Like a thermostat, it lags — rate changes take 12 to 18 months to fully work through the economy.
+
+Questions to sit with: When you hear that the Fed raised interest rates, can you now trace how that might affect your personal financial life? If inflation erodes the purchasing power of cash savings, what does that suggest about keeping large amounts of money in a savings account long-term? And why do you think the government chose to give an independent body — not elected officials — control over interest rates?`,
+
+  "world::The history of wealth inequality in America": `Wealth inequality in America is not a new phenomenon, but its current scale is historically significant. The distribution of wealth — not income, but accumulated assets — has shifted dramatically over the past half-century. Understanding how and why this happened is essential for understanding the economic environment you're operating in.
+
+In the mid-20th century, the decades following World War II produced what economists call the "Great Compression" — a period when wages grew broadly across income levels and the middle class expanded significantly. Several forces drove this: strong labor unions, high top marginal tax rates, the GI Bill which gave millions of veterans access to education and homeownership, and an economy where the U.S. was the dominant manufacturer in a world still rebuilding from war.
+
+Beginning in the 1970s and accelerating through the 1980s, several shifts changed this trajectory. Union membership declined sharply. Tax policy shifted — top marginal rates dropped significantly. Globalization moved manufacturing jobs overseas. The rise of the financial sector created enormous wealth for those with access to capital markets. The result: wealth has concentrated toward the top while wages for the bottom half stagnated in real terms.
+
+The mental model: wealth accumulates structurally as well as individually. The policies, tax codes, and economic structures of a society determine who has access to wealth-building mechanisms before anyone makes a personal choice. This doesn't mean individual effort is irrelevant — it clearly matters — but it means the starting line and rules of the game are not identical for everyone.
+
+Questions to sit with: What economic advantages or disadvantages did your family start with that affected your trajectory before you made any choices? What policies or structural features of the current economy primarily benefit people who already have wealth versus people building it? And how does understanding inequality change what you think about your own financial priorities?`,
+
+  "world::What the Cold War was really about": `The Cold War lasted from roughly 1947 to 1991, and if you were educated in the United States, you likely received a version of it that emphasized freedom versus communism, democracy versus tyranny. That framing is not entirely wrong, but it is dramatically incomplete — and the incomplete version leaves you unable to understand how American foreign policy actually operates.
+
+At its core, the Cold War was a geopolitical competition between two superpowers — the United States and the Soviet Union — who emerged from World War II as the only countries with enough industrial capacity and military power to project influence globally. Each had an ideology: the U.S. promoted liberal capitalism and democracy; the Soviets promoted Marxist-Leninist communism. But the competition was at least as much about power, resources, strategic geography, and spheres of influence as it was about ideology.
+
+Both sides supported governments that served their strategic interests regardless of whether those governments were democratic or repressive. The U.S. backed dictators throughout Latin America, the Middle East, and Asia during the Cold War — not because it approved of dictatorship but because those dictators were anti-communist. The ideological framing was real but selective.
+
+This matters because the pattern — powerful countries pursuing strategic interests while narrating those interests as moral causes — didn't end with the Cold War. Understanding it helps you read current events more clearly. The discipline of asking "who benefits from this, and how?" is essential.
+
+The mental model: powerful actors in politics, business, and life almost always act from a combination of self-interest and principle. The question is not whether self-interest is present — it always is — but how much it shapes the stated reasoning versus the actual behavior.
+
+Questions to sit with: Can you think of a current geopolitical conflict where the stated reasons and the actual strategic interests might be different? How does understanding the Cold War's complexity change how you evaluate current American foreign policy? And what domestic institutions or movements were shaped by Cold War politics in ways that still affect life today?`,
+
+  "world::How media shapes public opinion": `Media shapes public opinion not primarily through lying — though that happens — but through something more subtle and more pervasive: the selection of what to cover, how to frame it, and how much attention to give it. This is called agenda-setting and framing, and it is the mechanism by which media exerts enormous influence while remaining technically factual most of the time.
+
+Agenda-setting is the observation that media doesn't tell you what to think — it tells you what to think about. The issues that receive consistent, prominent coverage become the issues the public perceives as important, regardless of their actual significance. A story about local crime that dominates local news makes crime feel like an urgent crisis whether or not crime rates are actually rising.
+
+Framing is how a story is presented once it's chosen for coverage. The same event described as a "protest" versus a "riot," as "tax relief" versus "tax cuts for the wealthy" — these are different frames that activate different associations and emotional responses, even when the underlying facts are identical.
+
+The business model of attention-based media has a structural bias toward content that generates strong emotional responses. Fear, outrage, and tribal validation are the most reliable engagement drivers. This means your media environment, if not curated deliberately, will tend to over-represent threatening and divisive content relative to its actual prevalence in the world.
+
+The mental model: treat your media diet like your food diet. What you consume consistently shapes your thinking whether you're aware of it or not. A diversified media diet — sources from different perspectives, different countries, different formats — is the equivalent of nutritional variety.
+
+Questions to sit with: What are the two or three sources where you get most of your news? What are their ownership structures and business models? And is there a major issue affecting your life where you feel confident you understand it from multiple genuine perspectives rather than one?`,
+
+  "world::The rise of China as a global power": `China's rise from extreme poverty to the world's second-largest economy in roughly 40 years is one of the most significant geopolitical developments of the last century. Understanding it is essential for understanding the economic and political world you will spend your entire adult life navigating.
+
+In 1978, China was an impoverished, isolated country still recovering from the catastrophic policies of the Cultural Revolution. Deng Xiaoping implemented pragmatic economic reforms that opened China to foreign investment and market mechanisms while maintaining one-party political control. The formula — economic liberalization without political liberalization — produced growth rates averaging near 10% annually for three decades, lifting hundreds of millions of people out of poverty.
+
+This growth was enabled by: an enormous, low-cost labor force that made China the world's manufacturer; massive infrastructure investment by the state; integration into global trade systems; and a high savings and investment rate. The U.S. and Western countries enabled much of this by moving manufacturing to China for cost efficiency — generating profits and cheap consumer goods for decades while hollowing out manufacturing employment in places like the American Midwest.
+
+The current tension between the U.S. and China is not simply ideological. It is a competition between an established power and a rising one for technological leadership, military positioning, economic influence in developing countries, and control of supply chains. This competition will shape global politics, technology policy, and economic conditions for the rest of your life.
+
+The mental model: power transitions between great powers are historically the most dangerous moments in international relations. The question is not whether China will continue to grow and assert influence — it will — but whether that transition can be managed without catastrophic conflict.
+
+Questions to sit with: What goods or services in your daily life are manufactured in China? If the U.S.-China relationship deteriorated significantly, how would that affect your economic life? And what do you think a country with China's history — including a century of humiliation by foreign powers — reasonably wants from its position in the world today?`,
+
+  "world::Why colonialism still matters today": `Colonialism — the practice of European powers claiming, settling, and economically dominating territories across Africa, Asia, the Americas, and elsewhere — formally ended in the mid-to-late 20th century for most of the world. The argument that it "still matters" is sometimes dismissed as relitigating ancient history. But the structures colonialism created — economic, political, psychological, geographic — did not disappear when the flags changed.
+
+The mechanics of colonial extraction were straightforward: colonizing powers extracted resources and labor from dominated territories, enriched themselves at the territory's expense, and structured local economies to serve the colonizer rather than the local population. When colonial rule ended, these structural distortions remained. Political borders drawn by European powers at conferences like the Berlin Conference of 1884 — without reference to existing ethnic, linguistic, or cultural boundaries — created post-colonial states with built-in internal tensions that produced conflict for decades.
+
+In the United States, the legacy of slavery and subsequent legalized segregation operated similarly. Redlining — the systematic denial of mortgages and insurance to Black families in many neighborhoods — was federal policy until 1968, preventing generations from building equity through homeownership during the period when the white middle class was doing exactly that. These are not distant abstractions; they are recent enough that people alive today had parents or grandparents directly affected by them.
+
+The mental model: structures outlast the explicit policies that created them. You cannot understand current inequality by looking only at current policy without understanding the historical structures that created starting conditions.
+
+Questions to sit with: What specific historical policies shaped the economic starting conditions of the community you grew up in? How does understanding structural history change how you think about individual responsibility and social mobility? And what do you think a fair reckoning with this history would actually require?`,
+
+  "world::How revolutions actually happen": `Revolutions are almost never what they look like from the outside — spontaneous uprisings of oppressed people who've finally had enough. The reality is more complex and more instructive. Most successful revolutions follow patterns that political scientists and historians have documented with enough consistency to be genuinely predictive.
+
+The political scientist Crane Brinton studied the French, American, English, and Russian revolutions and identified a common anatomy. They all occurred not when things were at their worst — which tends to produce exhausted resignation — but during periods of rising expectations followed by frustrated improvement. People who have been grinding in misery for generations often accept it. People who have recently experienced better conditions and then see them reversed or blocked become dangerous.
+
+Revolutions also require what political scientists call elite fragmentation — a split within the ruling class, where some members of the establishment defect to or refuse to suppress the revolutionary cause. The military or police who won't fire on protesters. The insider who leaks damaging information. Without elite fractures, raw popular movements are almost always suppressed. With them, they have a chance.
+
+The pattern repeats in organizational and institutional settings at every scale. A company that changes dramatically rarely does so because of frontline employee pressure alone — it happens when internal leadership splits and some part of the establishment endorses the change.
+
+The mental model: change — whether political, organizational, or personal — almost always requires a combination of organized pressure from below and fracture from above. Neither alone is usually sufficient.
+
+Questions to sit with: Think of a significant change you've seen happen in an institution — a team, an organization, a community. Can you identify both sources of pressure — from below and from within? And is there a change you want to see happen somewhere in your life right now — what combination of pressure and internal support would it require?`,
+};
+
+const tracks = [
+  {
+    id: "money", label: "Money & Power", icon: "◈", color: "#C9A84C",
+    description: "Wealth, contracts, taxes, ownership, negotiation",
+    topics: ["How compound interest actually works","Reading and negotiating a contract","Multi-state tax obligations for athletes","The difference between assets and liabilities","How agents and advisors make money off you","Building income streams that don't depend on your body","What an LLC actually protects you from","Understanding your credit and why it matters"],
+  },
+  {
+    id: "mind", label: "Mind & Rhetoric", icon: "◎", color: "#7EB8A4",
+    description: "Logic, philosophy, persuasion, precise communication",
+    topics: ["What a logical fallacy is and how to spot one","The Socratic method and how to use it","Stoicism as a practical philosophy for athletes","How to construct a persuasive argument","The difference between opinion and evidence","Active listening as a power skill","First principles thinking","How to read a difficult book"],
+  },
+  {
+    id: "world", label: "World & History", icon: "◉", color: "#A07CB8",
+    description: "History, geopolitics, power, mental models",
+    topics: ["Why the Roman Empire fell and what it teaches us","How the Federal Reserve works","The history of wealth inequality in America","What the Cold War was really about","How media shapes public opinion","The rise of China as a global power","Why colonialism still matters today","How revolutions actually happen"],
+  },
+];
+
+function App() {
+  const [activeTrackId, setActiveTrackId] = useState(null);
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [view, setView] = useState("home");
+  const [completed, setCompleted] = useState({});
+  const topRef = useRef(null);
+
+  useEffect(() => {
+    try { const s = localStorage.getItem("jcurr3"); if (s) setCompleted(JSON.parse(s)); } catch(e) {}
+  }, []);
+
+  const save = (updated) => {
+    setCompleted(updated);
+    try { localStorage.setItem("jcurr3", JSON.stringify(updated)); } catch(e) {}
+  };
+
+  const isComplete = (tid, topic) => !!completed[`${tid}::${topic}`];
+  const markComplete = (tid, topic) => save({ ...completed, [`${tid}::${topic}`]: true });
+
+  const totalLessons = tracks.reduce((a, t) => a + t.topics.length, 0);
+  const completedCount = Object.keys(completed).length;
+  const track = tracks.find(t => t.id === activeTrackId);
+
+  const openLesson = (t, topic) => {
+    setActiveTrackId(t.id);
+    setSelectedTopic(topic);
+    setView("lesson");
+    setTimeout(() => topRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+  };
+
+  return (
+    <div ref={topRef}>
+      <div style={{borderBottom:"1px solid #1a1a1a",padding:"22px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,background:"#0D0D0D",zIndex:10}}>
+        <div onClick={() => setView("home")} style={{cursor:"pointer"}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:"1rem",fontWeight:700,letterSpacing:".15em",textTransform:"uppercase"}}>The Curriculum</div>
+          <div style={{fontSize:".65rem",color:"#555",letterSpacing:".1em",marginTop:2}}>JOHNNY · PERSONAL EDITION</div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontSize:".68rem",color:"#555",letterSpacing:".08em",marginBottom:5}}>{completedCount} / {totalLessons} DONE</div>
+          <div style={{width:90,height:2,background:"#1a1a1a"}}>
+            <div className="pbar" style={{width:`${(completedCount/totalLessons)*100}%`}}/>
+          </div>
+        </div>
+      </div>
+
+      {view === "home" && (
+        <div className="fi">
+          <div style={{padding:"52px 36px 36px",maxWidth:660}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.7rem,5vw,2.9rem)",fontWeight:900,lineHeight:1.15,marginBottom:16}}>
+              Build the mind<br/>
+              <span style={{color:"#555",fontStyle:"italic",fontWeight:400}}>no one can take from you.</span>
+            </div>
+            <div style={{fontFamily:"'EB Garamond',serif",fontSize:"1.05rem",color:"#666",lineHeight:1.75,maxWidth:460}}>
+              Three tracks. 24 lessons written for your life — as an athlete, as a person building something worth building.
+            </div>
+          </div>
+          <div className="hgrid">
+            {tracks.map(t => {
+              const done = t.topics.filter(tp => isComplete(t.id, tp)).length;
+              return (
+                <div key={t.id} className="tcard" onClick={() => { setActiveTrackId(t.id); setView("track"); }}>
+                  <div style={{fontSize:"1.9rem",color:t.color,marginBottom:16,fontFamily:"monospace"}}>{t.icon}</div>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:"1.2rem",fontWeight:700,marginBottom:8}}>{t.label}</div>
+                  <div style={{fontFamily:"'EB Garamond',serif",fontSize:".95rem",color:"#666",lineHeight:1.6,marginBottom:22}}>{t.description}</div>
+                  <div style={{fontSize:".68rem",letterSpacing:".1em",color:t.color,opacity:.8}}>{done}/{t.topics.length} LESSONS</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {view === "track" && track && (
+        <div className="fi" style={{maxWidth:660,margin:"0 auto",padding:"40px 28px"}}>
+          <button className="btn" onClick={() => setView("home")} style={{marginBottom:32}}>← Back</button>
+          <div style={{marginBottom:40}}>
+            <div style={{fontSize:"2rem",color:track.color,fontFamily:"monospace",marginBottom:12}}>{track.icon}</div>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:"1.7rem",fontWeight:700,marginBottom:8}}>{track.label}</div>
+            <div style={{fontFamily:"'EB Garamond',serif",fontSize:"1rem",color:"#666"}}>{track.description}</div>
+          </div>
+          <div>
+            {track.topics.map((topic, i) => {
+              const done = isComplete(track.id, topic);
+              return (
+                <div key={i} className="trow" onClick={() => openLesson(track, topic)}>
+                  <div style={{fontFamily:"'EB Garamond',serif",fontSize:"1.05rem",color:done?"#555":"#BEB6A6",textDecoration:done?"line-through":"none",flex:1}}>{topic}</div>
+                  <div className="cc" style={{borderColor:done?track.color:"#222",background:done?track.color+"22":"transparent",color:done?track.color:"transparent"}}>✓</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {view === "lesson" && track && (
+        <div className="fi" style={{maxWidth:640,margin:"0 auto",padding:"40px 28px"}}>
+          <button className="btn" onClick={() => setView("track")} style={{marginBottom:32}}>← Back to {track.label}</button>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:"1.45rem",fontWeight:700,lineHeight:1.3,marginBottom:10}}>{selectedTopic}</div>
+          <div style={{fontSize:".66rem",letterSpacing:".12em",color:track.color,marginBottom:36,textTransform:"uppercase"}}>{track.label}</div>
+          <div className="lbody">{lessons[`${track.id}::${selectedTopic}`]}</div>
+          <div style={{marginTop:48,paddingTop:24,borderTop:"1px solid #1a1a1a"}}>
+            {!isComplete(track.id, selectedTopic)
+              ? <button className="btn" onClick={() => markComplete(track.id, selectedTopic)} style={{borderColor:track.color,color:track.color,padding:"12px 28px"}}>Mark as Complete ✓</button>
+              : <div style={{fontFamily:"'EB Garamond',serif",fontSize:".9rem",color:track.color,fontStyle:"italic"}}>✓ Completed</div>
+            }
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>, document.getElementById("root"));
+</script>
+</body>
+</html>
